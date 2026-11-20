@@ -1,0 +1,2515 @@
+{
+  "info": {
+    "_exporter_id": "60231342",
+    "_postman_id": "fad08230-85a1-48ad-8910-56f5ed74fb78",
+    "name": "Restful Booker",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "item": [
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst body = pm.response.json();\r\n\r\npm.test(\"Có token\", () => {\r\n    pm.expect(body.token)\r\n      .to.be.a(\"string\")\r\n      .and.not.empty;\r\n});\r\n\r\n// Chỉ lưu khi token hợp lệ\r\nif (\r\n    pm.response.code === 200 &&\r\n    typeof body.token === \"string\" &&\r\n    body.token.length > 0\r\n) {\r\n    pm.environment.set(\"token\", body.token);\r\n}\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Create token",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"username\": \"{{username}}\",\r\n  \"password\": \"{{password}}\"\r\n}\r\n"
+            },
+            "header": [],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth"
+              ],
+              "raw": "{{baseUrl}}/auth"
+            }
+          },
+          "response": []
+        }
+      ],
+      "name": "Auth"
+    },
+    {
+      "item": [
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC14 - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst res = pm.response.json();\r\n\r\npm.test(\"TC14 - Booking ID hợp lệ\", () => {\r\n    pm.expect(res.bookingid).to.be.a(\"number\");\r\n});\r\n\r\npm.test(\"TC14 - Dữ liệu trả về khớp\", () => {\r\n    pm.expect(res.booking.firstname).to.eql(\"An\");\r\n    pm.expect(res.booking.lastname).to.eql(\"Nguyen\");\r\n    pm.expect(res.booking.totalprice).to.eql(100);\r\n});\r\n\r\nif (typeof res.bookingid === \"number\") {\r\n    pm.environment.set(\"bookingId\", String(res.bookingid));\r\n}\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Create booking",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 100,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"GET Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst data = pm.response.json();\r\n\r\npm.test(\"Booking trả về có dữ liệu hợp lệ\", () => {\r\n    pm.expect(data.firstname).to.be.a(\"string\");\r\n    pm.expect(data.lastname).to.be.a(\"string\");\r\n    pm.expect(data.totalprice).to.be.a(\"number\");\r\n    pm.expect(data.bookingdates).to.be.an(\"object\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Get booking",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "1572"
+              ],
+              "raw": "{{baseUrl}}/booking/1572"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC07 - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"TC07 - Danh sách booking hợp lệ\", () => {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data).to.be.an(\"array\");\r\n\r\n    data.forEach(item => {\r\n        pm.expect(item.bookingid).to.be.a(\"number\");\r\n    });\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC07 - GET all bookings",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC11 - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst data = pm.response.json();\r\n\r\npm.test(\"TC11 - Thông tin booking chính xác\", () => {\r\n    pm.expect(data.firstname).to.eql(\"An\");\r\n    pm.expect(data.lastname).to.eql(\"Nguyen\");\r\n    pm.expect(data.totalprice).to.eql(100);\r\n    pm.expect(data.depositpaid).to.eql(true);\r\n});\r\n\r\npm.test(\"TC11 - Ngày đặt phòng chính xác\", () => {\r\n    pm.expect(data.bookingdates.checkin)\r\n      .to.eql(\"2026-12-01\");\r\n\r\n    pm.expect(data.bookingdates.checkout)\r\n      .to.eql(\"2026-12-03\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC11 - GET booking by valid ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC11 - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst data = pm.response.json();\r\n\r\npm.test(\"TC11 - Thông tin booking chính xác\", () => {\r\n    pm.expect(data.firstname).to.eql(\"An\");\r\n    pm.expect(data.lastname).to.eql(\"Nguyen\");\r\n    pm.expect(data.totalprice).to.eql(100);\r\n    pm.expect(data.depositpaid).to.eql(true);\r\n});\r\n\r\npm.test(\"TC11 - Ngày đặt phòng chính xác\", () => {\r\n    pm.expect(data.bookingdates.checkin)\r\n      .to.eql(\"2026-12-01\");\r\n\r\n    pm.expect(data.bookingdates.checkout)\r\n      .to.eql(\"2026-12-03\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC12 - GET booking by nonexistent ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC13 - Status 400 hoặc 404\", () => {\r\n    pm.expect([400, 404])\r\n      .to.include(pm.response.code);\r\n});\r\n\r\npm.test(\"TC13 - Không trả về booking\", () => {\r\n    const body = pm.response.text();\r\n\r\n    pm.expect(body).to.not.include('\"firstname\"');\r\n    pm.expect(body).to.not.include('\"bookingdates\"');\r\n});\r\n\r\nconsole.log(\"Actual Status:\", pm.response.code);\r\nconsole.log(\"Actual Body:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC13 - GET booking by invalid ID format",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "abc"
+              ],
+              "raw": "{{baseUrl}}/booking/abc"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC08 - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst data = pm.response.json();\r\n\r\npm.test(\"TC08 - Response là mảng booking\", () => {\r\n    pm.expect(data).to.be.an(\"array\");\r\n\r\n    data.forEach(item => {\r\n        pm.expect(item.bookingid).to.be.a(\"number\");\r\n    });\r\n});\r\n\r\npm.test(\"TC08 - Có booking tên An vừa tạo\", () => {\r\n    const bookingId = Number(\r\n        pm.environment.get(\"bookingId\")\r\n    );\r\n\r\n    const ids = data.map(item => item.bookingid);\r\n\r\n    pm.expect(ids).to.include(bookingId);\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC08 - GET bookings by firstname",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "query": [
+                {
+                  "key": "firstname",
+                  "value": "An"
+                }
+              ],
+              "raw": "{{baseUrl}}/booking?firstname=An"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC08 - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst data = pm.response.json();\r\n\r\npm.test(\"TC08 - Response là mảng booking\", () => {\r\n    pm.expect(data).to.be.an(\"array\");\r\n\r\n    data.forEach(item => {\r\n        pm.expect(item.bookingid).to.be.a(\"number\");\r\n    });\r\n});\r\n\r\npm.test(\"TC08 - Có booking họ Nguyễn vừa tạo\", () => {\r\n    const bookingId = Number(\r\n        pm.environment.get(\"bookingId\")\r\n    );\r\n\r\n    const ids = data.map(item => item.bookingid);\r\n\r\n    pm.expect(ids).to.include(bookingId);\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC09 - GET bookings by lastname",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "query": [
+                {
+                  "key": "lastname",
+                  "value": "Nguyen"
+                }
+              ],
+              "raw": "{{baseUrl}}/booking?lastname=Nguyen"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC10 - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst data = pm.response.json();\r\n\r\npm.test(\"TC10 - Response là mảng booking\", () => {\r\n    pm.expect(data).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"TC10 - Có booking khớp ngày checkin\", () => {\r\n    const bookingId = Number(\r\n        pm.environment.get(\"bookingId\")\r\n    );\r\n\r\n    const ids = data.map(item => item.bookingid);\r\n\r\n    pm.expect(ids).to.include(bookingId);\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC10 - GET bookings by checkin date",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "query": [
+                {
+                  "key": "checkin",
+                  "value": "2026-12-01"
+                }
+              ],
+              "raw": "{{baseUrl}}/booking?checkin=2026-12-01"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"PUT Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst data = pm.response.json();\r\n\r\npm.test(\"Firstname đã được cập nhật\", () => {\r\n    pm.expect(data.firstname)\r\n      .to.eql(\"MinhUpdated\");\r\n});\r\n\r\npm.test(\"Giá và yêu cầu đã được cập nhật\", () => {\r\n    pm.expect(data.totalprice).to.eql(200);\r\n    pm.expect(data.additionalneeds).to.eql(\"Dinner\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Update booking",
+          "request": {
+            "auth": {
+              "basic": [
+                {
+                  "key": "username",
+                  "type": "string",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "type": "string",
+                  "value": "{{vault:auth_password_1abp}}"
+                }
+              ],
+              "type": "basic"
+            },
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"MinhUpdated\",\r\n  \"lastname\": \"Tran\",\r\n  \"totalprice\": 200,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-11-01\",\r\n    \"checkout\": \"2026-11-03\"\r\n  },\r\n  \"additionalneeds\": \"Dinner\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "disabled": true,
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"PATCH Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst data = pm.response.json();\r\n\r\npm.test(\"Cập nhật additionalneeds thành công\", () => {\r\n    pm.expect(data.additionalneeds)\r\n      .to.eql(\"Late checkout\");\r\n});\r\n\r\npm.test(\"Các trường khác không thay đổi\", () => {\r\n    pm.expect(data.firstname)\r\n      .to.eql(\"MinhUpdated\");\r\n\r\n    pm.expect(data.totalprice)\r\n      .to.eql(200);\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Patch booking",
+          "request": {
+            "auth": {
+              "basic": [
+                {
+                  "key": "username",
+                  "type": "string",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "type": "string",
+                  "value": "{{vault:auth_password_1abp}}"
+                }
+              ],
+              "type": "basic"
+            },
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"additionalneeds\": \"Late checkout\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"PUT without authentication returns 403\", function () {\r\n    pm.response.to.have.status(403);\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "PUT without authentication",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"Unauthorized\",\r\n  \"lastname\": \"Test\",\r\n  \"totalprice\": 200,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-11-01\",\r\n    \"checkout\": \"2026-11-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"DELETE Status 201\", () => {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response là Created\", () => {\r\n    pm.expect(pm.response.text())\r\n      .to.eql(\"Created\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Delete booking",
+          "request": {
+            "auth": {
+              "basic": [
+                {
+                  "key": "username",
+                  "type": "string",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "type": "string",
+                  "value": "{{vault:auth_password_1abp}}"
+                }
+              ],
+              "type": "basic"
+            },
+            "header": [],
+            "method": "DELETE",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"Booking đã xóa trả về 404\", () => {\r\n    pm.response.to.have.status(404);\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Verify booking deleted",
+          "request": {
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC15 - Status 400\", () => {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"TC15 - Không tạo booking\", () => {\r\n    const body = pm.response.text();\r\n\r\n    pm.expect(body).to.not.include('\"bookingid\"');\r\n});\r\n\r\nconsole.log(\"Actual Status:\", pm.response.code);\r\nconsole.log(\"Actual Body:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC15 - POST missing firstname",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 100,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC16 - Status 400\", () => {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"TC16 - Không tạo booking\", () => {\r\n    const body = pm.response.text();\r\n\r\n    pm.expect(body).to.not.include('\"bookingid\"');\r\n});\r\n\r\nconsole.log(\"Actual Status:\", pm.response.code);\r\nconsole.log(\"Actual Body:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC16 - POST missing lastname",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"totalprice\": 100,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC17 – POST missing bookingdates",
+          "request": {
+            "header": [],
+            "method": "GET",
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC18 - POST missing checkin",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 100,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC19 - POST totalprice as string",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": \"100\",\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\nconst tc = pm.info.requestName.split(\" - \")[0];\r\n\r\n// Kiểm tra HTTP Status\r\npm.test(`${tc} - Expected Status 400`, () => {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\n// Kiểm tra Response không chứa bookingid\r\npm.test(`${tc} - Không trả về bookingid`, () => {\r\n    const body = pm.response.text();\r\n\r\n    pm.expect(body).to.not.include('\"bookingid\"');\r\n});\r\n\r\n// In kết quả thực tế ra Console\r\nconsole.log(`${tc} - Actual Status:`, pm.response.code);\r\nconsole.log(`${tc} - Actual Body:`, pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC20 - POST depositpaid as number",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 100,\r\n  \"depositpaid\": 1,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC21 - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"TC21 - Totalprice bằng 0\", () => {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.bookingid).to.be.a(\"number\");\r\n    pm.expect(data.booking.totalprice).to.eql(0);\r\n    pm.expect(data.booking.totalprice).to.be.a(\"number\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC21 - POST totalprice zero",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 0,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC22 - Expected Status 400\", () => {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"TC22 - Không trả về bookingid\", () => {\r\n    pm.expect(pm.response.text())\r\n      .to.not.include('\"bookingid\"');\r\n});\r\n\r\nconsole.log(\"Actual:\", pm.response.code);\r\nconsole.log(\"Body:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC22 - POST negative totalprice",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": -1,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\nconsole.log(\"TC23 Status:\", pm.response.code);\r\nconsole.log(\"TC23 Body:\", pm.response.text());\r\n\r\nif (pm.response.code === 200) {\r\n    pm.test(\"TC23 - Giá không bị thay đổi\", () => {\r\n        const data = pm.response.json();\r\n\r\n        pm.expect(data.booking.totalprice)\r\n          .to.eql(9999999999);\r\n    });\r\n} else {\r\n    pm.test(\"TC23 - Không trả về bookingid\", () => {\r\n        pm.expect(pm.response.text())\r\n          .to.not.include('\"bookingid\"');\r\n    });\r\n}\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC23 - POST large totalprice",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 9999999999,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC24 - Expected Status 400\", () => {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"TC24 - Không trả về bookingid\", () => {\r\n    pm.expect(pm.response.text())\r\n      .to.not.include('\"bookingid\"');\r\n});\r\n\r\nconsole.log(\"Actual:\", pm.response.code);\r\nconsole.log(\"Body:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC24 - POST checkout before checkin",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 100,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-03\",\r\n    \"checkout\": \"2026-12-01\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC25 - Expected Status 400\", () => {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"TC25 - Không trả về bookingid\", () => {\r\n    pm.expect(pm.response.text())\r\n      .to.not.include('\"bookingid\"');\r\n});\r\n\r\nconsole.log(\"Actual Status:\", pm.response.code);\r\nconsole.log(\"Actual Body:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC25 - POST malformed JSON",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 100,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC26 - Status 400 hoặc 415\", () => {\r\n    pm.expect([400, 415])\r\n      .to.include(pm.response.code);\r\n});\r\n\r\npm.test(\"TC26 - Không trả về bookingid\", () => {\r\n    pm.expect(pm.response.text())\r\n      .to.not.include('\"bookingid\"');\r\n});\r\n\r\nconsole.log(\"Actual:\", pm.response.code);\r\nconsole.log(\"Body:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC26 - POST invalid Content-Type",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 100,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC27 - Status 404 hoặc 405\", () => {\r\n    pm.expect([404, 405])\r\n      .to.include(pm.response.code);\r\n});\r\n\r\nconsole.log(\"Actual Status:\", pm.response.code);\r\nconsole.log(\"Actual Body:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC27 - DELETE unsupported endpoint",
+          "request": {
+            "auth": {
+              "basic": [
+                {
+                  "key": "username",
+                  "type": "string",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "type": "string",
+                  "value": "{{vault:auth_password_1abp}}"
+                }
+              ],
+              "type": "basic"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC28 - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"TC28 - Dữ liệu cập nhật đúng\", () => {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.firstname).to.eql(\"AnUpdated\");\r\n    pm.expect(data.lastname).to.eql(\"Nguyen\");\r\n    pm.expect(data.totalprice).to.eql(200);\r\n    pm.expect(data.additionalneeds).to.eql(\"Dinner\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC28 - PUT valid token",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"AnUpdated\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 200,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Dinner\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC29 - Không có xác thực bị từ chối\", () => {\r\n    pm.expect([401, 403])\r\n      .to.include(pm.response.code);\r\n});\r\n\r\nconsole.log(\"Actual:\", pm.response.code);\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC29 - PUT without token",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"Unauthorized\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 500,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Unauthorized change\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC30 - Token sai bị từ chối\", () => {\r\n    pm.expect([401, 403])\r\n      .to.include(pm.response.code);\r\n});\r\n\r\nconsole.log(\"Actual:\", pm.response.code);\r\nconsole.log(\"Body:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC30 - PUT invalid token",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"InvalidToken\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 600,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Invalid token test\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token=invalid-token-123456"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC31 - Token hết hiệu lực bị từ chối\", () => {\r\n    pm.expect([401, 403])\r\n      .to.include(pm.response.code);\r\n});\r\n\r\nconsole.log(\"Actual Status:\", pm.response.code);\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC31 - PUT old token",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"OldTokenTest\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 700,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Old token test\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{oldToken}}"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC32 - Status 400\", () => {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"TC32 - Không trả về booking cập nhật\", () => {\r\n    const body = pm.response.text();\r\n\r\n    pm.expect(body).to.not.include('\"firstname\"');\r\n});\r\n\r\nconsole.log(\"TC32 Actual Status:\", pm.response.code);\r\nconsole.log(\"TC32 Response:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC32 - PUT missing firstname",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 200,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Dinner\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC33 - Expected Status 404\", () => {\r\n    pm.response.to.have.status(404);\r\n});\r\n\r\nconsole.log(\"TC33 Actual Status:\", pm.response.code);\r\nconsole.log(\"TC33 Response:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC33 - PUT nonexistent booking ID",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"An\",\r\n  \"lastname\": \"Nguyen\",\r\n  \"totalprice\": 100,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "999999999"
+              ],
+              "raw": "{{baseUrl}}/booking/999999999"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC34 - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst data = pm.response.json();\r\n\r\npm.test(\"TC34 - Firstname được cập nhật\", () => {\r\n    pm.expect(data.firstname).to.eql(\"AnUpdated\");\r\n});\r\n\r\npm.test(\"TC34 - Các trường khác giữ nguyên\", () => {\r\n    pm.expect(data.lastname).to.eql(\"Nguyen\");\r\n    pm.expect(data.totalprice).to.eql(100);\r\n    pm.expect(data.depositpaid).to.eql(true);\r\n\r\n    pm.expect(data.bookingdates.checkin)\r\n      .to.eql(\"2026-12-01\");\r\n\r\n    pm.expect(data.bookingdates.checkout)\r\n      .to.eql(\"2026-12-03\");\r\n\r\n    pm.expect(data.additionalneeds)\r\n      .to.eql(\"Breakfast\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC34 - PATCH update firstname",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"AnUpdated\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "disabled": true,
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "method": "PATCH",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC35 - Không có token bị từ chối\", () => {\r\n    pm.expect([401, 403])\r\n      .to.include(pm.response.code);\r\n});\r\n\r\nconsole.log(\"TC35 Actual Status:\", pm.response.code);\r\nconsole.log(\"TC35 Response:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC35 - PATCH without token",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"NoAuthTest\"\r\n}\r\n\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC36 - Token sai bị từ chối\", () => {\r\n    pm.expect([401, 403])\r\n      .to.include(pm.response.code);\r\n});\r\n\r\nconsole.log(\"TC36 Actual Status:\", pm.response.code);\r\nconsole.log(\"TC36 Response:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC36 - PATCH invalid token",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"InvalidTokenTest\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "disabled": true,
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token=invalid-token-123456"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC37 - Status 400\", () => {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"TC37 - Không trả về booking cập nhật\", () => {\r\n    const body = pm.response.text();\r\n\r\n    pm.expect(body).to.not.include('\"bookingdates\"');\r\n});\r\n\r\nconsole.log(\"TC37 Actual Status:\", pm.response.code);\r\nconsole.log(\"TC37 Response:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC37 - PATCH depositpaid as number",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"depositpaid\": 1\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "disabled": true,
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC38 - Expected Status 404\", () => {\r\n    pm.response.to.have.status(404);\r\n});\r\n\r\nconsole.log(\"TC38 Actual Status:\", pm.response.code);\r\nconsole.log(\"TC38 Response:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC38 - PATCH nonexistent booking ID",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"NewName\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "disabled": true,
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "method": "PATCH",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "99999999"
+              ],
+              "raw": "{{baseUrl}}/booking/99999999"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC39 - DELETE Status 201\", () => {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"TC39 - Response là Created\", () => {\r\n    pm.expect(pm.response.text())\r\n      .to.eql(\"Created\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC39 - DELETE booking with valid token",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\npm.test(\"TC39 - DELETE Status 201\", () => {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"TC39 - Response là Created\", () => {\r\n    pm.expect(pm.response.text())\r\n      .to.eql(\"Created\");\r\n});\r\n"
+            },
+            "header": [
+              {
+                "disabled": true,
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "disabled": true,
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "method": "DELETE",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC40 - Status 401 hoặc 403\", () => {\r\n    pm.expect([401, 403])\r\n      .to.include(pm.response.code);\r\n});\r\n\r\npm.test(\"TC40 - Không xóa thành công\", () => {\r\n    pm.expect(pm.response.code)\r\n      .to.not.eql(201);\r\n});\r\n\r\nconsole.log(\"TC40 Actual Status:\", pm.response.code);\r\nconsole.log(\"TC40 Response:\", pm.response.text());\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC40 – DELETE booking without token",
+          "request": {
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        }
+      ],
+      "name": "Booking CRUD"
+    },
+    {
+      "item": [
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"Invalid booking returns 404\", function () {\r\n    pm.response.to.have.status(404);\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "GET invalid booking ID",
+          "request": {
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "999999999"
+              ],
+              "raw": "{{baseUrl}}/booking/999999999"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Invalid credentials are rejected\", function () {\r\n    const data = pm.response.json();\r\n    pm.expect(data.reason).to.eql(\"Bad credentials\");\r\n});\r\n\r\npm.test(\"No token is returned\", function () {\r\n    const data = pm.response.json();\r\n    pm.expect(data).to.not.have.property(\"token\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "POST invalid credentials",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"username\": \"admin\",\r\n  \"password\": \"wrongpassword\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth"
+              ],
+              "raw": "{{baseUrl}}/auth"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC01 - Health check trả về 201 và body Created\", () => {\r\n  pm.response.to.have.status(201);\r\n  pm.expect(pm.response.text().trim()).to.equal(\"Created\");\r\n});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC01 - Health check",
+          "request": {
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "restful-booker",
+                "herokuapp",
+                "com"
+              ],
+              "path": [
+                "ping"
+              ],
+              "protocol": "https",
+              "raw": "https://restful-booker.herokuapp.com/ping"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC02 - status 200\", () => pm.response.to.have.status(200));\r\n\r\nconst body = pm.response.json();\r\npm.test(\"TC02 - có token\", () => {\r\n  pm.expect(body.token).to.be.a(\"string\").and.not.empty;\r\n});\r\n\r\nif (pm.response.code === 200 && typeof body.token === \"string\") {\r\n  pm.environment.set(\"token\", body.token);\r\n}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC02 - Create token",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"password123\"\r\n}"
+            },
+            "header": [],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth"
+              ],
+              "raw": "{{baseUrl}}/auth"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"TC03 - Không cấp token khi sai mật khẩu\", () => {\r\n    const body = pm.response.json();\r\n\r\n    pm.expect(body).to.not.have.property(\"token\");\r\n    pm.expect(body.reason).to.eql(\"Bad credentials\");\r\n});\r\n\r\n// Ghi nhận status thực tế\r\nconsole.log(\"TC03 Status:\", pm.response.code);\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "TC03 - Invalid password",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"username\": \"admin\",\r\n  \"password\": \"wrongpassword\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth"
+              ],
+              "raw": "{{baseUrl}}/auth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC04 - Username is empty",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"password\": \"password123\"\r\n}\r\n    "
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth"
+              ],
+              "raw": "{{baseUrl}}/auth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC05 - Password is empty",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"username\": \"admin\"\r\n}\r\n    "
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth"
+              ],
+              "raw": "{{baseUrl}}/auth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC06 - JSON content",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"username\": \"admin\",\r\n  \"password\": \"password123\"\r\n    "
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth"
+              ],
+              "raw": "{{baseUrl}}/auth"
+            }
+          },
+          "response": []
+        }
+      ],
+      "name": "Negative"
+    },
+    {
+      "item": [
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"DDT - Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst res = pm.response.json();\r\n\r\n// Đọc dữ liệu từ CSV\r\nconst firstname = String(\r\n    pm.iterationData.get(\"firstname\")\r\n);\r\n\r\nconst lastname = String(\r\n    pm.iterationData.get(\"lastname\")\r\n);\r\n\r\nconst totalprice = Number(\r\n    pm.iterationData.get(\"totalprice\")\r\n);\r\n\r\nconst depositpaid = String(\r\n    pm.iterationData.get(\"depositpaid\")\r\n).toLowerCase() === \"true\";\r\n\r\n// Kiểm tra Booking ID\r\npm.test(\"DDT - Booking ID hợp lệ\", () => {\r\n    pm.expect(res.bookingid).to.be.a(\"number\");\r\n});\r\n\r\n// Kiểm tra họ tên\r\npm.test(\"DDT - Họ tên khớp CSV\", () => {\r\n    pm.expect(res.booking.firstname).to.eql(firstname);\r\n    pm.expect(res.booking.lastname).to.eql(lastname);\r\n});\r\n\r\n// Kiểm tra giá\r\npm.test(\"DDT - Totalprice khớp CSV\", () => {\r\n    pm.expect(res.booking.totalprice).to.eql(totalprice);\r\n});\r\n\r\n// Kiểm tra boolean\r\npm.test(\"DDT - Depositpaid khớp CSV\", () => {\r\n    pm.expect(res.booking.depositpaid).to.eql(depositpaid);\r\n});\r\n\r\nconsole.log(\"Iteration:\", pm.info.iteration + 1);\r\nconsole.log(\"Firstname:\", firstname);\r\nconsole.log(\"Booking ID:\", res.bookingid);\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Create booking - DDT",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"{{firstname}}\",\r\n  \"lastname\": \"{{lastname}}\",\r\n  \"totalprice\": {{totalprice}},\r\n  \"depositpaid\": {{depositpaid}},\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-12-01\",\r\n    \"checkout\": \"2026-12-03\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        }
+      ],
+      "name": "Day 32 - Data Driven"
+    },
+    {
+      "item": [
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst body = pm.response.json();\r\n\r\npm.test(\"Có token\", () => {\r\n    pm.expect(body.token)\r\n      .to.be.a(\"string\")\r\n      .and.not.empty;\r\n});\r\n\r\n// Chỉ lưu khi token hợp lệ\r\nif (\r\n    pm.response.code === 200 &&\r\n    typeof body.token === \"string\" &&\r\n    body.token.length > 0\r\n) {\r\n    pm.environment.set(\"token\", body.token);\r\n}\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Create token",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"username\": \"{{username}}\",\r\n  \"password\": \"{{password}}\"\r\n}\r\n"
+            },
+            "header": [],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth"
+              ],
+              "raw": "{{baseUrl}}/auth"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"Status 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst res = pm.response.json();\r\n\r\npm.test(\"Booking ID hợp lệ\", () => {\r\n    pm.expect(res.bookingid).to.be.a(\"number\");\r\n});\r\n\r\npm.test(\"Dữ liệu trả về khớp\", () => {\r\n    pm.expect(res.booking.firstname).to.eql(\"Lan\");\r\n    pm.expect(res.booking.lastname).to.eql(\"Vu\");\r\n    pm.expect(res.booking.totalprice).to.eql(180);\r\n});\r\n\r\nif (typeof res.bookingid === \"number\") {\r\n    pm.environment.set(\"bookingId\", String(res.bookingid));\r\n}\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Create booking",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"Lan\",\r\n  \"lastname\": \"Vu\",\r\n  \"totalprice\": 180,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-11-18\",\r\n    \"checkout\": \"2026-11-21\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "raw": "{{baseUrl}}/booking"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"GET Status 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"GET booking fields are valid\", function () {\r\n    const bookingDetails = pm.response.json();\r\n\r\n    pm.expect(bookingDetails.firstname).to.be.a(\"string\");\r\n    pm.expect(bookingDetails.lastname).to.be.a(\"string\");\r\n    pm.expect(bookingDetails.totalprice).to.be.a(\"number\");\r\n    pm.expect(bookingDetails.bookingdates).to.be.an(\"object\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Get booking",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"PUT Status 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"PUT firstname updated\", function () {\r\n    const updatedBooking = pm.response.json();\r\n\r\n    pm.expect(updatedBooking.firstname)\r\n      .to.eql(\"LanUpdated\");\r\n});\r\n\r\npm.test(\"PUT price and needs updated\", function () {\r\n    const updatedBooking = pm.response.json();\r\n\r\n    pm.expect(updatedBooking.totalprice).to.eql(200);\r\n    pm.expect(updatedBooking.additionalneeds).to.eql(\"Dinner\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Update booking",
+          "request": {
+            "auth": {
+              "basic": [
+                {
+                  "key": "username",
+                  "type": "string",
+                  "value": "{{username}}"
+                },
+                {
+                  "key": "password",
+                  "type": "string",
+                  "value": "{{password}}"
+                }
+              ],
+              "type": "basic"
+            },
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"firstname\": \"LanUpdated\",\r\n  \"lastname\": \"Vu\",\r\n  \"totalprice\": 200,\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-11-26\",\r\n    \"checkout\": \"2026-11-30\"\r\n  },\r\n  \"additionalneeds\": \"Dinner\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "disabled": true,
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"PATCH Status 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"PATCH additionalneeds updated\", function () {\r\n    const patchedBooking = pm.response.json();\r\n\r\n    pm.expect(patchedBooking.additionalneeds)\r\n      .to.eql(\"Late checkout\");\r\n});\r\n\r\npm.test(\"PATCH other fields unchanged\", function () {\r\n    const patchedBooking = pm.response.json();\r\n\r\n    pm.expect(patchedBooking.firstname)\r\n      .to.eql(\"LanUpdated\");\r\n\r\n    pm.expect(patchedBooking.totalprice)\r\n      .to.eql(200);\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Patch booking",
+          "request": {
+            "auth": {
+              "basic": [
+                {
+                  "key": "username",
+                  "type": "string",
+                  "value": "{{username}}"
+                },
+                {
+                  "key": "password",
+                  "type": "string",
+                  "value": "{{password}}"
+                }
+              ],
+              "type": "basic"
+            },
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "\r\n{\r\n  \"additionalneeds\": \"Late checkout\"\r\n}\r\n"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"DELETE Status 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response is Created\", function () {\r\n    pm.expect(pm.response.text()).to.eql(\"Created\");\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Delete booking",
+          "request": {
+            "auth": {
+              "basic": [
+                {
+                  "key": "username",
+                  "type": "string",
+                  "value": "{{username}}"
+                },
+                {
+                  "key": "password",
+                  "type": "string",
+                  "value": "{{password}}"
+                }
+              ],
+              "type": "basic"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r\npm.test(\"Booking đã xóa trả về 404\", () => {\r\n    pm.response.to.have.status(404);\r\n});\r\n"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "Verify booking deleted",
+          "request": {
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ],
+              "raw": "{{baseUrl}}/booking/{{bookingId}}"
+            }
+          },
+          "response": []
+        }
+      ],
+      "name": "CI Smoke"
+    }
+  ]
+}

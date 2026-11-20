@@ -1,0 +1,49 @@
+
+name: API tests
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install Newman
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Run API tests
+        env:
+          RB_PASSWORD: ${{ secrets.RB_PASSWORD }}
+        run: |
+          mkdir -p reports
+
+          newman run postman/restful-booker.postman_collection.json \
+            -e postman/restful-booker.postman_environment.json \
+            --folder "CI Smoke" \
+            --env-var "baseUrl=https://restful-booker.herokuapp.com" \
+            --env-var "username=admin" \
+            --env-var "password=$RB_PASSWORD" \
+            -r cli,htmlextra \
+            --reporter-htmlextra-export reports/report.html
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: reports/
+          if-no-files-found: warn
