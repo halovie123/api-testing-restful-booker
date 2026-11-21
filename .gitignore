@@ -1,5 +1,11 @@
-
-reports/
+# Dependencies
 node_modules/
+
+# Sensitive files
 .env
 *.log
+
+# Generated reports
+reports/*.html
+reports/*.json
+reports/*.zip
